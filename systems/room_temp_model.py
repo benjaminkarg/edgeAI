@@ -1,8 +1,5 @@
 import numpy as np
-import sys
-path_edgeAI = '../'
-sys.path.insert(0,path_edgeAI+'lib')
-from edgeAI_classes import edgeAI_system
+from lib.edgeAI_classes import edgeAI_System
 
 def room_temp_model():
     """
@@ -50,6 +47,6 @@ def room_temp_model():
     R = np.diag([1.])
 
     ### create edgeAI_system
-    system = edgeAI_system(A,B,E,F,Bx,BN,Bu,dx,dN,du,Q,QN,R,typ)
+    system = edgeAI_System(A,B,E,F,Bx,BN,Bu,dx,dN,du,Q,QN,R,typ)
 
     return system
