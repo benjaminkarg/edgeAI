@@ -6,7 +6,7 @@ import pdb
 
 ### parameter/options
 code = 'c'
-project_name = 'emr_3'
+project_name = 'example'
 N = 12
 max_iter = 2000
 opt = edgeAI_Options(code,project_name,N,max_iter)
@@ -19,7 +19,7 @@ sys = room_temp_model()
 prob = None
 
 ### neural networks
-nn = edgeAI_NeuralNetwork("test")
+nn = edgeAI_NeuralNetwork("example")
 
 ### external data
 data = sio.loadmat('data/wdata_processed.mat')
@@ -30,9 +30,9 @@ edgy = edgeAI(opt,sys,prob,nn,extdata)
 
 # choose which parts of the code should be generated
 solver = 'nn' # either nn or qp
-simulation = True
-edgy.generate_code_mpc(solver,simulation)
+# simulation = True
+# edgy.generate_code_mpc(solver,simulation)
 
 # generate code for a dnn
-device = 'micro' # either "micro" for microcontroller or "fpga" for FPGA
-# edgy.generate_code_dnn(device)
+device = 'fpga' # either "micro" for microcontroller or "fpga" for FPGA
+edgy.generate_code_dnn(device)
