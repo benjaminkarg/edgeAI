@@ -6,13 +6,13 @@ for several  applications like control, image recognition, etc.
 ## Getting Started
 A small example is provided which generates executable c-code for a neural network.
 Just open a terminal and run
-...
+'''
 python example.py
-...
+'''
 or
-...
+'''
 run example.py
-...
+'''
 from an ipython console.
 
 ### Installing
