@@ -7,6 +7,7 @@ import scipy.io as sio
 from numpy.linalg import inv
 import matlab.engine
 import os
+import csv
 import pdb
 
 class edgeAI_Options:
@@ -115,18 +116,35 @@ class edgeAI_NeuralNetwork:
                 self.bias.append(edgeAI_Matrix(np.reshape(weight_values[1][:],(-1,1)),"bias_"+str(k)))
         self.num_layers = k
 
-        ### read ~.mat file with scaling information
-        scaling_data = sio.loadmat("../nn_data/"+net_name+".mat")
-        dif_in = scaling_data["up_in"] - scaling_data["low_in"]
-        dif_inv_in = np.reshape(1./dif_in,(-1,1))
+        ### read ~.csv files with scaling information
+        # input
+        low_in = np.zeros([0,1])
+        up_in = np.zeros([0,1])
+        with open("../nn_data/"+net_name+"_in.csv",'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                li = np.reshape(float(row['low_in']),(1,1))
+                ui = np.reshape(float(row['up_in']),(1,1))
+                low_in = np.append(low_in,li,axis=0)
+                up_in = np.append(up_in,ui,axis=0)
+        # output
+        low_out = np.zeros([0,1])
+        up_out = np.zeros([0,1])
+        with open("../nn_data/"+net_name+"_out.csv",'r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                lo = np.reshape(float(row['low_out']),(1,1))
+                uo = np.reshape(float(row['up_out']),(1,1))
+                low_out = np.append(low_out,lo,axis=0)
+                up_out = np.append(up_out,uo,axis=0)
+
+        dif_in = up_in - low_in
+        dif_inv_in = 1./dif_in
         self.dif_inv_in = edgeAI_Matrix(dif_inv_in,"dif_inv_in")
-        low_in = np.reshape(scaling_data["low_in"],(-1,1))
         self.low_in = edgeAI_Matrix(low_in,"low_in")
-        low_out = np.reshape(scaling_data["low_out"],(-1,1))
-        self.low_out = edgeAI_Matrix(low_out,"low_out")
-        dif_out = scaling_data["up_out"] - scaling_data["low_out"]
-        dif_out = np.reshape(dif_out,(-1,1))
+        dif_out = up_out - low_out
         self.dif_out = edgeAI_Matrix(dif_out,"dif_out")
+        self.low_out = edgeAI_Matrix(low_out,"low_out")
 
     def write_data(self,f):
         self.dif_inv_in.write(f)
