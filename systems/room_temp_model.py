@@ -1,5 +1,7 @@
 import numpy as np
-from lib.edgeAI_classes import edgeAI_System
+import sys
+sys.path.insert(0,'../lib')
+from edgeAI_classes import edgeAI_System
 
 def room_temp_model():
     """

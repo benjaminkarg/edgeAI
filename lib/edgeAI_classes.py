@@ -11,7 +11,7 @@ import pdb
 
 class edgeAI_Options:
     """ A class containing all the options for code generation"""
-    def __init__(self,code_type,project_name,horizon,max_iter):
+    def __init__(self,code_type,project_name,horizon=0,max_iter=0):
         if (code_type == 'ino') or (code_type == 'c'):
             project_name += '_' + code_type
         else:
@@ -93,9 +93,8 @@ class edgeAI_NeuralNetwork:
     from trained keras models (h5 and json file)
     """
     def __init__(self,net_name):
-
         ### read ~.json
-        with open("nn_data/"+net_name+".json") as json_data:
+        with open("../nn_data/"+net_name+".json") as json_data:
             d_load = json.load(json_data)
             layers = d_load["config"]["layers"]
         self.act_fun = []
@@ -103,7 +102,7 @@ class edgeAI_NeuralNetwork:
             self.act_fun.append(layers[i+1]["config"]["activation"].encode())
 
         ### read ~.h5
-        hf = h5py.File("nn_data/"+net_name+".h5", "r")
+        hf = h5py.File("../nn_data/"+net_name+".h5", "r")
         layer_names = [n.decode('utf8') for n in hf.attrs['layer_names']]
         self.kernel = []
         self.bias = []
@@ -117,7 +116,7 @@ class edgeAI_NeuralNetwork:
         self.num_layers = k
 
         ### read ~.mat file with scaling information
-        scaling_data = sio.loadmat("nn_data/"+net_name+".mat")
+        scaling_data = sio.loadmat("../nn_data/"+net_name+".mat")
         dif_in = scaling_data["up_in"] - scaling_data["low_in"]
         dif_inv_in = np.reshape(1./dif_in,(-1,1))
         self.dif_inv_in = edgeAI_Matrix(dif_inv_in,"dif_inv_in")
