@@ -5,6 +5,7 @@ import numpy as np
 import scipy.io as sio
 from edgeAI_classes import *
 from energy_management_system import *
+import csv
 import pdb
 
 ### parameter/options
@@ -17,15 +18,17 @@ opt = edgeAI_Options(code,project_name,N,max_iter)
 ### system
 sys = energy_management_system()
 
-### problem
-prob = None # for control with deep neural network
-
 ### neural networks
 nn = edgeAI_NeuralNetwork("example")
 
 ### external data
-data = sio.loadmat('external_data/wdata_processed.mat')
-extdata = edgeAI_ExtData(data["extdata"])
+ext_vec = np.zeros([0,1])
+with open('../external_data/weather_data.csv','r') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        nv = np.reshape(float(row['weather_data']),(1,1))
+        ext_vec = np.append(ext_vec,nv,axis=0)
+extdata = edgeAI_ExtData(ext_vec)
 
 ### create edgeAI
 edgy = edgeAI(opt,sys,prob,nn,extdata)
