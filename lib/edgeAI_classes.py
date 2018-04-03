@@ -95,7 +95,7 @@ class edgeAI_NeuralNetwork:
     """
     def __init__(self,net_name):
         ### read ~.json
-        with open("../nn_data/"+net_name+".json") as json_data:
+        with open("../neural_networks/"+net_name+".json") as json_data:
             d_load = json.load(json_data)
             layers = d_load["config"]["layers"]
         self.act_fun = []
@@ -103,7 +103,7 @@ class edgeAI_NeuralNetwork:
             self.act_fun.append(layers[i+1]["config"]["activation"].encode())
 
         ### read ~.h5
-        hf = h5py.File("../nn_data/"+net_name+".h5", "r")
+        hf = h5py.File("../neural_networks/"+net_name+".h5", "r")
         layer_names = [n.decode('utf8') for n in hf.attrs['layer_names']]
         self.kernel = []
         self.bias = []
@@ -120,7 +120,7 @@ class edgeAI_NeuralNetwork:
         # input
         low_in = np.zeros([0,1])
         up_in = np.zeros([0,1])
-        with open("../nn_data/"+net_name+"_in.csv",'r') as csvfile:
+        with open("../neural_networks/"+net_name+"_in.csv",'r') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 li = np.reshape(float(row['low_in']),(1,1))
@@ -130,7 +130,7 @@ class edgeAI_NeuralNetwork:
         # output
         low_out = np.zeros([0,1])
         up_out = np.zeros([0,1])
-        with open("../nn_data/"+net_name+"_out.csv",'r') as csvfile:
+        with open("../neural_networks/"+net_name+"_out.csv",'r') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 lo = np.reshape(float(row['low_out']),(1,1))

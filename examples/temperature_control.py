@@ -24,7 +24,7 @@ prob = edgeAI_Problem(sys,opt)
 nn = None
 
 ### external data
-data = sio.loadmat('data/wdata_processed.mat')
+data = sio.loadmat('external_data/wdata_processed.mat')
 extdata = edgeAI_ExtData(data["extdata"])
 
 ### create edgeAI
