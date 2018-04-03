@@ -4,5 +4,6 @@
 *.c
 *.h
 *.ino
+*.mat
 __pycache__/
 mat_to_csv.py
