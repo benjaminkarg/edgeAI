@@ -2,6 +2,7 @@ import numpy as np
 import scipy.io as sio
 from lib.edgeAI_classes import *
 from systems.room_temp_model import *
+from systems.energy_management_system import *
 import pdb
 
 ### parameter/options
@@ -13,6 +14,7 @@ opt = edgeAI_Options(code,project_name,N,max_iter)
 
 ### system
 sys = room_temp_model()
+sys = energy_management_system()
 
 ### problem
 # prob = edgeAI_Problem(sys,opt)
@@ -30,9 +32,9 @@ edgy = edgeAI(opt,sys,prob,nn,extdata)
 
 # choose which parts of the code should be generated
 solver = 'nn' # either nn or qp
-# simulation = True
-# edgy.generate_code_mpc(solver,simulation)
+simulation = True
+edgy.generate_code_mpc(solver,simulation)
 
 # generate code for a dnn
 device = 'fpga' # either "micro" for microcontroller or "fpga" for FPGA
-edgy.generate_code_dnn(device)
+# edgy.generate_code_dnn(device)

@@ -967,7 +967,7 @@ class edgeAI:
                 if self.opt.solver == "nn":
                     if "tanh" in self.nn.act_fun:
                         self.wftc_he(f,"mtx_tanh",
-                                    ["vec","rows"],
+                                    ["vec[]","rows"],
                                     ["real_t","uint32_t"],
                                     [0,1],[1,0])
                         self.wftc_lv(f,["i"],["uint32_t"])
@@ -1071,9 +1071,16 @@ class edgeAI:
                     struct_list.append("edgeAI_dnn *dnn")
                     type_list.append(3)
                     ripe_list.append(1)
+
                 struct_list += ["*x_trj","*u_trj","*z","*mue","*x","*u"]
                 type_list += [1,1,1,1,1,1]
                 ripe_list += [0,0,0,0,0,0]
+
+                if self.opt.solver == "nn":
+                    struct_list += ["*in_scaled","*out","*out_scaled"]
+                    type_list += [1,1,1,1]
+                    ripe_list += [0,0,0,0]
+
                 self.wstc(f,"edgeAI_ctl",
                 struct_list,
                 type_list,
@@ -1358,9 +1365,9 @@ class edgeAI:
 
                 elif self.opt.solver == "nn":
 
-                    var_list = ["k"]
-                    type_list = ["uint32_t"]
-                    for k in range(self.nn.num_layers-1):
+                    var_list = []
+                    type_list = []
+                    for k in range(self.nn.num_layers):
                         var_list.append("x_layer_"+str(k+1)+"["+str(self.nn.kernel[k].rows)+"]")
                         type_list.append("real_t")
                     self.wftc_lv(f,var_list,type_list)
@@ -1370,16 +1377,20 @@ class edgeAI:
                     for k in range(self.nn.num_layers):
                         if k == 0:
                             f.write("\t")
-                            self.mult(self.nn.kernel[k],"ctl->dnn->","ctl->x","x_mean_"+str(k+1),f)
+                            self.mult(self.nn.kernel[k],"ctl->dnn->","ctl->x","x_layer_"+str(k+1),f)
                             f.write("\tmtx_add(x_layer_"+str(k+1)+",x_layer_"+str(k+1)+",ctl->dnn->bias_"+str(k+1)+","+str(self.nn.kernel[k].rows)+",1);\n")
                             if self.nn.act_fun[k] == "relu":
                                 f.write("\tmtx_max_vec_zero(x_layer_"+str(k+1)+","+str(self.nn.kernel[k].rows)+");\n\n")
                             elif self.nn.act_fun[k] == "tanh":
                                 f.write("\tmtx_tanh(x_layer_"+str(k+1)+","+str(self.nn.kernel[k].rows)+");\n\n")
+                        elif k == (self.nn.num_layers-1):
+                            f.write("\t")
+                            self.mult(self.nn.kernel[k],"ctl->dnn->","x_layer_"+str(k),"x_layer_"+str(k+1),f)
+                            f.write("\tmtx_add(ctl->out_scaled,x_layer_"+str(k+1)+",ctl->dnn->bias_"+str(k+1)+","+str(self.nn.kernel[k].rows)+",1);\n")
                         else:
                             f.write("\t")
-                            self.mult(self.nn.kernel[k],"ctl->dnn->","x_mean_"+str(k),"x_mean_"+str(k+1),f)
-                            f.write("\tmtx_add(x_layer_"+str(k+1)+",x_layer_"+str(k+1)+",ctl->dnn->bias_"+str(k+1)+","+str(self.nn.kernel[k].rows)+",1)\n")
+                            self.mult(self.nn.kernel[k],"ctl->dnn->","x_layer_"+str(k),"x_layer_"+str(k+1),f)
+                            f.write("\tmtx_add(x_layer_"+str(k+1)+",x_layer_"+str(k+1)+",ctl->dnn->bias_"+str(k+1)+","+str(self.nn.kernel[k].rows)+",1);\n")
                             if self.nn.act_fun[k] == "relu":
                                 f.write("\tmtx_max_vec_zero(x_layer_"+str(k+1)+","+str(self.nn.kernel[k].rows)+");\n\n")
                             elif self.nn.act_fun[k] == "tanh":
@@ -1442,7 +1453,7 @@ class edgeAI:
                               [0],[0],"s")
 
                     self.wftc_lv(f,["out_sca["+str(self.nn.dif_out.rows)+"]"],["real_t"])
-                    f.write("mult_scale(out_sca, ctl->u_scaled, ctl->dnn->dif_out, "+str(self.nn.low_out.rows)+", 1);\n")
+                    f.write("mult_scale(out_sca, ctl->out_scaled, ctl->dnn->dif_out, "+str(self.nn.low_out.rows)+", 1);\n")
                     f.write("\tmtx_add(ctl->u, out_sca, ctl->dnn->low_out, "+str(self.nn.low_out.rows)+", 1);\n")
 
                     self.wftc_he(f)
@@ -1601,7 +1612,7 @@ class edgeAI:
                 self.witc(f,"<stdio.h>")
                 self.witc(f,"edgeAI/include/edgeAI_main.h")
                 f.write("int main(void)\n{\n\t")
-                f.write("int k;\n\t")
+                f.write("int k, i;\n\t")
                 f.write("extern struct edgeAI_ctl ctl;\n\t")
 
                 if mode == "nn":
@@ -1721,8 +1732,8 @@ class edgeAI:
                     if self.sys.F.mat.size > 0:
                         f.write("COUPLINGS = " + str(int(self.sys.nz)) + ",\n")
                         f.write("HOR_COUPLINGS = " + str(int(N*self.sys.nz)) + ",\n")
-                    f.write("OPT_VAR = " + str(int((N+1)*self.sys.nx+N*self.sys.nu)) + "\n};\n")
-                    # f.write("MULT = " + str(int(self.prob.nm)) + "\n};\n")
+                    f.write("OPT_VAR = " + str(int((N+1)*self.sys.nx+N*self.sys.nu)) + ",\n")
+                    f.write("MULT = " + '10' + "\n};\n")
 
                 self.wdtc(f)
 
@@ -1786,6 +1797,11 @@ class edgeAI:
                 f.write("real_t z[OPT_VAR];\n")
                 f.write("real_t mue[MULT];\n")
 
+                if self.opt.solver == "nn":
+                    f.write("\nreal_t in_scaled[STATES+HOR_DISTURBANCES];\n")
+                    f.write("real_t out[INPUTS];\n")
+                    f.write("real_t out_scaled[INPUTS];\n")
+
                 ### predefintion of the structs
                 if self.ed:
                     self.ed.write_struct(f)
@@ -1803,7 +1819,10 @@ class edgeAI:
                     self.nn.write_struct(f)
                     ctl_str += "&dnn, "
 
-                f.write(ctl_str+"x_trj, u_trj, z, mue, x, u};\n")
+                ctl_str += "x_trj, u_trj, z, mue, x, u"
+                if self.opt.solver == "nn":
+                    ctl_str += ", in_scaled, out, out_scaled"
+                f.write(ctl_str+"};\n")
 
     def write_makefiles(self):
 
