@@ -15,7 +15,7 @@ max_iter = 2000
 opt = edgeAI_Options(code,project_name,N,max_iter)
 
 ### system
-sys = energy_management_system()
+sys = room_temp_model()
 
 ### problem
 prob = edgeAI_Problem(sys,opt)

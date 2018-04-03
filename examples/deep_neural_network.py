@@ -12,7 +12,7 @@ project_name = 'deep_neural_network'
 opt = edgeAI_Options(code,project_name)
 
 ### neural networks
-nn = edgeAI_NeuralNetwork("example")
+nn = edgeAI_NeuralNetwork(project_name)
 
 ### create edgeAI
 edgy = edgeAI(opt,neuralnetwork=nn)
