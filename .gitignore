@@ -1,7 +1,8 @@
 # Add any directories, files, or patterns you don't want to be tracked by version control
-.pyc
-.asv
-.c
-.h
-.ino
+*.pyc
+*.asv
+*.c
+*.h
+*.ino
 __pycache__/
+mat_to_csv.py
