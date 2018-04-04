@@ -1,11 +1,12 @@
 import numpy as np
 import json
 import h5py
+import picos as pic
+from cvxopt import matrix, solvers
 from scipy.sparse import csr_matrix
 from scipy.linalg import block_diag
 import scipy.io as sio
 from numpy.linalg import inv
-import matlab.engine
 import os
 import csv
 import pdb
@@ -390,12 +391,23 @@ class edgeAI_Problem:
             F = np.vstack([np.zeros([sys.nx,F.shape[1]]),F])
             H_z = np.dot(H_b,F)
 
-        ### TODO: Solution without matlab and yalmip
         bound = np.dot(np.dot(B,Hinv),B.T)
-        sio.savemat('bound.mat',{'bound':bound})
-        eng = matlab.engine.start_matlab()
-        Lmat = eng.solve_for_L("bound.mat")
-        L = sio.loadmat("L.mat")['L']
+        P = pic.Problem()
+        L = P.add_variable('L',bound.shape)
+        IJ = []
+        for i in range(bound.shape[0]):
+            for j in range(bound.shape[1]):
+                if i != j:
+                    IJ.append((i,j))
+        P.add_list_of_constraints(
+        [L[i,j]==0 for (i,j) in IJ],
+        [('ij',2)],
+        'IJ')
+        P.add_constraint(L>=bound)
+        P.set_objective('min','I'|L)
+        P.solve()
+        L = L.value
+
         Linv = inv(L)
         LinvB = np.dot(Linv,B)
         Linvd = np.dot(Linv,d)
@@ -410,10 +422,6 @@ class edgeAI_Problem:
             self.H_z = edgeAI_Matrix(H_z,"H_z","OPT_VAR","HOR_COUPLINGS")
         self.LinvB = edgeAI_Matrix(LinvB,"LinvB","MULT","OPT_VAR")
         self.Linvd = edgeAI_Matrix(Linvd,"Linvd","MULT","1")
-
-        ### clean directory
-        os.remove("bound.mat")
-        os.remove("L.mat")
 
     def write_data(self,f):
         self.H_x.write(f)
