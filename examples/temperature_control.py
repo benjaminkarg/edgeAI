@@ -10,7 +10,7 @@ import pdb
 
 ### parameter/options
 code = 'c'
-project_name = 'energy_management_system'
+project_name = 'temperature_control'
 N = 12
 max_iter = 2000
 opt = edgeAI_Options(code,project_name,N,max_iter)
@@ -19,7 +19,7 @@ opt = edgeAI_Options(code,project_name,N,max_iter)
 sys = room_temp_model()
 
 ### problem
-# prob = edgeAI_Problem(sys,opt)
+prob = edgeAI_Problem(sys,opt)
 
 ### neural networks
 nn = None
