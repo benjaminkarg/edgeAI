@@ -2,10 +2,21 @@
 This is an open-source python tool to generate tailored c-code for embedded devices.
 The code can be used to deploy deep neural networks, qp-solvers and more
 for several applications like control, image recognition, etc..
-It can also be used to run simulations of an MPC setup and for similar usages.
+It can also be used to run simulations of an MPC setup and similar usages.
 
 ## Getting Started
-Just download or clone the repository and make sure all the necessary python modules are installed.
+
+### Installing
+Just download or clone the repository and make sure all the following packages are installed.
+
+### Packages
+* NumPy
+* h5py
+* PICOS
+* CVXOPT
+* SciPy
+
+### First examples
 Three examples are provided in the folder examples.
 Just change directory to examples, open a terminal and run
 ```
@@ -16,9 +27,6 @@ or
 run ~.py
 ```
 from an ipython console.
-
-### Installing
-There is no installation needed, just make sure that you have installed all the necessary python modules.
 
 ## Content
 This section explains how **edgeAI** is organised:
@@ -42,12 +50,12 @@ Additionally, scaling data for the input and the output of the network can be pr
 How the files and the headers should be named can be seen in the examples.
 
 ## Authors
-* **Benjamin Karg** - *Initial work* - [Paper]()
+* **Benjamin Karg** - *Initial work* - [Deep-learning based embedded mixed-integer model predictive control](https://github.com/benjaminkarg/edgeAI)
   * B. Karg and S. Lucia. "Deep-learning based embedded mixed-integer model predictive control". In Proc. of the European Control Conference (in Press), 2018.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
-* Thank you very much for libraries like numpy, etc.
+* Thank you very much to all the contributors to the libraries named in *Packages*
 * Thanks to Prof. Sergio Lucia ;)

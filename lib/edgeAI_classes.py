@@ -7,7 +7,6 @@ from scipy.sparse import csr_matrix
 from scipy.linalg import block_diag
 import scipy.io as sio
 from numpy.linalg import inv
-import os
 import csv
 import pdb
 
