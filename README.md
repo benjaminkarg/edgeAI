@@ -43,7 +43,7 @@ How the files and the headers should be named can be seen in the examples.
 
 ## Authors
 * **Benjamin Karg** - *Initial work* - [Paper]()
-  * B. Karg and S. Lucia. "Deep-learning based". IN Proc. of the European Control Conference (in Press), 2018.
+  * B. Karg and S. Lucia. "Deep-learning based embedded mixed-integer model predictive control". IN Proc. of the European Control Conference (in Press), 2018.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
