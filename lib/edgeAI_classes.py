@@ -13,7 +13,7 @@ import pdb
 
 class edgeAI_Options:
     """ A class containing all the options for code generation"""
-    def __init__(self,code_type,project_name,horizon=0,max_iter=0):
+    def __init__(self,code_type,project_name,horizon=0,max_iter=1):
         if (code_type == 'ino') or (code_type == 'c'):
             project_name += '_' + code_type
         else:
@@ -41,7 +41,10 @@ class edgeAI_Matrix:
                 self.vsc = varname_size_cols
             else:
                 self.vsc = str(self.cols)
-            self.nnz = sum(sum(self.mat!=0))
+            if self.mat != []:
+                self.nnz = sum(sum(self.mat!=0))
+            else:
+                self.nnz = 0
             if self.nnz < (self.rows*(self.cols-1)-1)/2.:
                 self.sparse = True
             else:
@@ -1402,7 +1405,7 @@ class edgeAI:
                     for k in range(self.nn.num_layers):
                         if k == 0:
                             f.write("\t")
-                            self.mult(self.nn.kernel[k],"ctl->dnn->","ctl->x","x_layer_"+str(k+1),f)
+                            self.mult(self.nn.kernel[k],"ctl->dnn->","ctl->in_scaled","x_layer_"+str(k+1),f)
                             f.write("\tmtx_add(x_layer_"+str(k+1)+",x_layer_"+str(k+1)+",ctl->dnn->bias_"+str(k+1)+","+str(self.nn.kernel[k].rows)+",1);\n")
                             if self.nn.act_fun[k] == "relu":
                                 f.write("\tmtx_max_vec_zero(x_layer_"+str(k+1)+","+str(self.nn.kernel[k].rows)+");\n\n")
@@ -1668,8 +1671,9 @@ class edgeAI:
                     for i in range(self.sys.nu):
                         f.write("ctl.u["+str(i)+"] = 0.;\n\t")
 
-                    self.wfltc(f,0,"MULT",var="k")
-                    f.write("\t\tctl.mue[k] = 0.;\n\t}")
+                    if self.prob:
+                        self.wfltc(f,0,"MULT",var="k")
+                        f.write("\t\tctl.mue[k] = 0.;\n\t}")
 
                     f.write("\n\tprintf(\"iter")
                     for i in range(self.sys.nx):
