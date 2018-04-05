@@ -46,7 +46,7 @@ How the files and the headers should be named can be seen in the examples.
   * B. Karg and S. Lucia. "Deep-learning based embedded mixed-integer model predictive control". In Proc. of the European Control Conference (in Press), 2018.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 * Thank you very much for libraries like numpy, etc.
