@@ -11,15 +11,14 @@ import pdb
 ### parameter/options
 code = 'c'
 project_name = 'energy_management_system'
-N = 12
-max_iter = 2000
-opt = edgeAI_Options(code,project_name,N,max_iter)
+N = 24
+opt = edgeAI_Options(code,project_name,N)
 
 ### system
 sys = energy_management_system()
 
 ### neural networks
-nn = edgeAI_NeuralNetwork("example")
+nn = edgeAI_NeuralNetwork('energy_management_system')
 
 ### external data
 ext_vec = np.zeros([0,1])
@@ -31,7 +30,7 @@ with open('../external_data/weather_data.csv','r') as csvfile:
 extdata = edgeAI_ExtData(ext_vec)
 
 ### create edgeAI
-edgy = edgeAI(opt,sys,prob,nn,extdata)
+edgy = edgeAI(opt=opt,sys=sys,neuralnetwork=nn,extdata=extdata)
 
 # choose which parts of the code should be generated
 solver = 'nn' # either nn or qp

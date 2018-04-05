@@ -14,7 +14,7 @@ def energy_management_system():
     ### parameters
     alpha_d = 0.05
     alpha_w = 0.25
-    n_d = 1.
+    n_d = 0.
     n_w = 0.
 
     ### system matrices
@@ -26,7 +26,7 @@ def energy_management_system():
     B = np.atleast_2d([[0.0035, 0.0, 0.0, 0.0],
                        [0.0003, 0.0, 0.0, 0.0],
                        [0.0002, 0.0, 0.0, 0.0],
-                       [0.0, 0.0, 0.0, -5.0]])
+                       [0.0, -5.0, 0.0, 0.0]])
 
     E = 1e-3 * np.atleast_2d([[22.217, 1.7912, 42.2123],
                               [ 1.5376, 0.6944, 2.9214],
