@@ -5,8 +5,22 @@
 *.h
 *.ino
 *.mat
+# don't save data except ~.h5, ~.json and ~.csv files from examples
+*.h5
+!energy_management_system.h5
+!deep_neural_network.h5
+*.json
+!energy_management_system.json
+!deep_neural_network.json
+*.csv
+!energy_management_system_in.csv
+!deep_neural_network_in.csv
+!energy_management_system_out.csv
+!deep_neural_network_out.csv
+!weather_data.csv
 __pycache__/
 mat_to_csv.py
 workfile.py
+# don't save generated code
 *_c
 *_ino
