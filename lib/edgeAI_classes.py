@@ -2,6 +2,7 @@ import numpy as np
 import json
 import h5py
 import picos as pic
+import os
 from cvxopt import matrix, solvers
 from scipy.sparse import csr_matrix
 from scipy.linalg import block_diag
@@ -1194,8 +1195,8 @@ class edgeAI:
 
             if mode == "nn":
 
-                ### run_dnn
-                self.wftc_he(f,"run_dnn",
+                ### make_dnn_step
+                self.wftc_he(f,"make_dnn_step",
                           ["*ctl"],
                           ["struct edgeAI_ctl"],
                           [0],[0])
@@ -1267,7 +1268,7 @@ class edgeAI:
                           ["struct edgeAI_ctl"],
                           [0],[0],"s")
 
-                self.wftc_lv(f,["in_dif[INPUT]"],["real_t"])
+                self.wftc_lv(f,["in_dif[SIZE_INPUT]"],["real_t"])
                 if device == "micro":
                     f.write("mtx_substract(in_dif, ctl->in, ctl->dnn->low_in, "+str(self.nn.low_in.rows)+", 1);\n")
                     f.write("\tmult_scale(ctl->in_scaled, in_dif, ctl->dnn->dif_inv_in, "+str(self.nn.low_in.rows)+", 1);\n")
@@ -1282,7 +1283,7 @@ class edgeAI:
                           ["struct edgeAI_ctl"],
                           [0],[0],"s")
 
-                self.wftc_lv(f,["out_scaled_biased[OUTPUT]"],["real_t"])
+                self.wftc_lv(f,["out_scaled_biased[SIZE_OUTPUT]"],["real_t"])
                 if device == "micro":
                     f.write("mult_scale(out_scaled_biased, ctl->out_scaled, ctl->dnn->dif_out, "+str(self.nn.low_out.rows)+", 1);\n")
                     f.write("\tmtx_add(ctl->out, out_scaled_biased, ctl->dnn->low_out, "+str(self.nn.low_out.rows)+", 1);\n")
@@ -1556,12 +1557,58 @@ class edgeAI:
         """
         if self.opt.code_type == 'ino':
 
-            with open(self.opt.path+"/"+self.opt.path+".ino","w") as f:
+            with open(self.opt.path+"/"+self.opt.project_name+".ino","w") as f:
 
                 if mode == "nn":
 
-                    ### TODO: Implement ~.ino file
-                    f.write("TODO: Implement")
+                    f.write("extern \"C\" {\n#include \"edgeAI_main.h\"\n}\n\n")
+                    f.write("extern struct edgeAI_ctl ctl;\n")
+                    f.write("uint32_t k;\n\n")
+
+                    ## setup
+                    f.write("void setup() {\n\t")
+                    f.write("Serial.begin(9600);\n\t") # initialize communication
+                    f.write("while (!Serial);\n\n\t") # wait until Serial established
+
+                    f.write("const float32_t ")
+                    for i in range(self.nn.low_in.rows):
+                        vi = float(self.nn.low_in.mat[i])
+                        if i == self.nn.low_in.rows-1:
+                            f.write("IN"+str(i)+" = "+str(vi)+";\n\t")
+                        else:
+                            f.write("IN"+str(i)+(" = "+str(vi)+", "))
+
+                    for i in range(self.nn.low_in.rows):
+                        f.write("ctl.in["+str(i)+"] = IN"+str(i)+";\n\t")
+
+                    f.write("\n\tk = 0;\n\n")
+
+                    # header
+                    #TODO: replace with for loops
+                    for i in range(self.nn.low_out.rows):
+                        if i == 0:
+                            f.write("\tSerial.print(\"out["+str(i)+"],\");\n\t")
+                        elif i == (self.nn.low_out.rows-1):
+                            f.write("Serial.print(\"\\t\\tout["+str(i)+"]\");\n\n\t}\n")
+                        else:
+                            f.write("Serial.print(\"\\t\\tout["+str(i)+"],\");\n\t")
+
+                    f.write("\nvoid loop() {\n\n\t")
+                    f.write("make_dnn_step(&ctl);\n\n\t")
+
+                    # result
+                    #TODO: replace with for loops
+                    for i in range(self.nn.low_out.rows):
+                        if i == (self.nn.low_out.rows-1):
+                            f.write("Serial.print(ctl.out["+str(i)+"]);\n\n\t")
+                        else:
+                            f.write("Serial.print(ctl.out["+str(i)+"]);\n\t")
+                            f.write("Serial.print(\"\\t\\t\");\n\t")
+
+                    f.write("k++;\n\n\t")
+
+                    f.write("while (k==1) {\n\t\tdelay(10000);\n\t}\n\n}")
+
 
                 else:
 
@@ -1656,7 +1703,7 @@ class edgeAI:
                             f.write("\\t\\tout["+str(i)+"]")
                     f.write("\\n\");\n\n\t")
 
-                    f.write("run_dnn(&ctl);\n\n\t")
+                    f.write("make_dnn_step(&ctl);\n\n\t")
 
                     self.wfltc(f,0,"OUTPUT",var="k")
                     f.write("\t\t\tprintf(\"\\t%f\",(ctl.out[k]));\n\t}\n\t")
@@ -1721,8 +1768,8 @@ class edgeAI:
                 self.witc(f,"edgeAI_arch.h")
 
                 f.write("\nenum {\n")
-                f.write("INPUT = " + str(self.nn.low_in.rows) + ",\n")
-                f.write("OUTPUT = " + str(self.nn.low_out.rows) + "\n};\n")
+                f.write("SIZE_INPUT = " + str(self.nn.low_in.rows) + ",\n")
+                f.write("SIZE_OUTPUT = " + str(self.nn.low_out.rows) + "\n};\n")
 
                 self.wdtc(f)
 
@@ -1776,10 +1823,10 @@ class edgeAI:
 
                 self.nn.write_struct(f)
 
-                f.write("\nreal_t in[INPUT];\n")
-                f.write("real_t in_scaled[INPUT];\n")
-                f.write("real_t out[OUTPUT];\n")
-                f.write("real_t out_scaled[OUTPUT];\n")
+                f.write("\nreal_t in[SIZE_INPUT];\n")
+                f.write("real_t in_scaled[SIZE_INPUT];\n")
+                f.write("real_t out[SIZE_OUTPUT];\n")
+                f.write("real_t out_scaled[SIZE_OUTPUT];\n")
 
                 f.write("\nstruct edgeAI_ctl ctl = {&dnn, in, in_scaled, out, out_scaled};\n")
 
