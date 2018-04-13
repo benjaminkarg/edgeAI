@@ -7,3 +7,6 @@
 *.mat
 __pycache__/
 mat_to_csv.py
+workfile.py
+*_c
+*_ino
