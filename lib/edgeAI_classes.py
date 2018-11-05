@@ -104,7 +104,7 @@ class edgeAI_NeuralNetwork:
             layers = d_load["config"]["layers"]
         self.act_fun = []
         for i in range(len(layers)-1):
-            self.act_fun.append(layers[i+1]["config"]["activation"].encode())
+            self.act_fun.append(layers[i+1]["config"]["activation"])#.encode())
 
         ### read ~.h5
         hf = h5py.File("../neural_networks/"+net_name+".h5", "r")
